@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ec695dc6-c34d-4494-95a2-86b49cbe0e94" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_config" doc:name="HTTP Request config" doc:id="1feebc21-600d-46cb-bbd2-94eda99e3f89" >
+		<http:request-connection host="training4-american-ws.cloudhub.io" port="80" />
+	</http:request-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="19bb6411-4b8c-4098-810e-830632046d55" >
+		<db:my-sql-connection host="iltdb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	</db:config>
+	<flow name="until_successfulFlow" doc:id="0a5700f5-887f-4e75-ae16-190bae03c093" >
+		<http:listener doc:name="Listener" doc:id="fa4d32b0-b4ba-4747-8742-19c773defdb7" config-ref="HTTP_Listener_config" path="/untils"/>
+		<logger level="INFO" doc:name="Logger" doc:id="5ce98282-bbb3-420d-b4b1-c0406d4c793c" />
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="b02dc4bd-0c89-461e-bd56-8ad2085c7fad" >
+			<db:select doc:name="Select" doc:id="7b266ff4-0105-47bb-9171-07c636626bd1" config-ref="Database_Config">
+				<db:sql ><![CDATA[select * from accounts]]></db:sql>
+			</db:select>
+		</until-successful>
+		<ee:transform doc:name="Transform Message" doc:id="a1786f99-2e21-4a8a-a69c-55156aeeed3d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d5baa5e1-9c10-4c51-bf40-a88d6921400c" />
+	</flow>
+</mule>
